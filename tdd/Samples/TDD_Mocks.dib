@@ -1,0 +1,52 @@
+#!csharp
+
+#r "nuget:Moq"
+#r "nuget:xUnit"
+// Mock library
+
+#!markdown
+
+# Business Logic
+
+#!csharp
+
+public interface IPizzaOrderService 
+{
+    List<double> GetPrices(string orderId);
+
+    // ...
+}
+
+
+public class PizzaBillCalculator 
+{
+    IPizzaOrderService _service;
+
+    public PizzaBillCalculator(IPizzaOrderService service) {
+        _service = service;
+    }
+
+    public double CalculateSum(string orderId)
+    {
+        var prices = _service.GetPrices(orderId);
+        return prices.Sum();
+    }
+}
+
+#!markdown
+
+# Test using Mocks
+
+#!csharp
+
+// Arrange
+var orderId = "123";
+var orderServiceMock = new Moq.Mock<IPizzaOrderService>();
+orderServiceMock.Setup(x => x.GetPrices(orderId)).Returns(new List<double> {1, 2, 3});
+var calculator = new PizzaBillCalculator(orderServiceMock.Object);
+
+// Act
+var sum = calculator.CalculateSum(orderId);
+
+// Assert
+Xunit.Assert.Equal(sum, 6);
